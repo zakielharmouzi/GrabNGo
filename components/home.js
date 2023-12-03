@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet,Pressable } from 'react-native';
-import Logout from './logout';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../supabase/supabase';
-
+import { AuthContext } from '../Authcontext/authcontext';
 
 const Home = ({ navigation }) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
+  const { userEmail } = useContext(AuthContext);
 
   const handle_signout = async () => {
     await supabase.auth.signOut();
@@ -18,38 +19,50 @@ const Home = ({ navigation }) => {
     navigation.navigate('Sign in');
   };
 
-  useEffect(() => {
-    const checkToken = async () => {
-      const token = await AsyncStorage.getItem('sb-jwbgvkgvkjspfnyurjfd-auth-token');
-      console.log(token);
-      if (!token) {
-        navigation.navigate('Sign in');
-      }
-    };  
-    const getusername = async () => {
-      const username = await AsyncStorage.getItem('email');
-      console.log("got username",username);
-      supabase.from('student').select('*').eq('email', username).then((res) => {
-        if (res.error) {
-          alert(res.error.message);
-          return;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchUserData = async () => {
+        const username = userEmail || await AsyncStorage.getItem('email');
+        if (username) {
+          try {
+            const { data, error } = await supabase
+              .from('student')
+              .select('*')
+              .eq('email', username)
+              .single();
+
+            if (error) throw error;
+
+            setName(data.username);
+            setRole(data.role);
+            console.log(data.role);
+            if (data.role === 'Staff') {
+            navigation.navigate('Staff');
+        } else{
+          console.log(role);
+            navigation.navigate('User');
         }
-        setName(res.data[0].username);
-        setRole(res.data[0].role);
-      });
-    }
-    getusername();
-    checkToken();
-    // redirect();
+      
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            alert(error.message);
+          }
+        } else {
+          navigation.navigate('Sign in');
+        }
+      };
 
-  }, []);
-
+      fetchUserData();
+    }, [userEmail, navigation])
+  );
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.button} onPress={handle_signout}>
-        <Text style={styles.buttonText}>Logout</Text>
+      <Pressable onPress={handle_signout}>
+        <Text>Sign out</Text>
       </Pressable>
+
       <View style={styles.content}>
         <Text style={styles.title}>Welcome to the Home Page!</Text>
         <Text style={styles.subtitle}>This is a simple home page in React Native.</Text>
@@ -59,7 +72,6 @@ const Home = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

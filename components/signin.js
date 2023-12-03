@@ -3,12 +3,14 @@ import { View, TextInput, Button, StyleSheet, TouchableOpacity, Text, Image ,Ima
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../supabase/supabase';
 import Toast from 'react-native-toast-message';
+import { AuthContext } from '../Authcontext/authcontext';
 
 const logo = require('../assets/logo.png');
 
 const SignIn = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const { setUserEmail } = React.useContext(AuthContext);
 
     const [name, setName] = useState('');
     const toastRef = useRef(null);
@@ -23,6 +25,10 @@ const SignIn = ({ navigation }) => {
 
    const handleSignIn = async (e) => {
     e.preventDefault();
+
+    AsyncStorage.removeItem('sb-jwbgvkgvkjspfnyurjfd-auth-token');
+    AsyncStorage.removeItem('email');
+
     Toast.show({
         type: 'success',
         position: 'top',
@@ -53,6 +59,7 @@ const SignIn = ({ navigation }) => {
                 visibilityTime: 4000,
             });
             AsyncStorage.setItem('email', username);
+            setUserEmail(username);
             navigation.navigate('Home');
         });
     

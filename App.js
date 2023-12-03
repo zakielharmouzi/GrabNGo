@@ -10,6 +10,7 @@ import Home from './components/home';
 import Toast from 'react-native-toast-message';
 import Homeuser from './components/userstack/homeuser';
 import Homestaff from './components/staffstack/homestaff';
+import { AuthProvider } from './Authcontext/authcontext';
 
 
 const Stack = createStackNavigator();
@@ -39,6 +40,7 @@ export default function App() {
   }
 
   return (
+     <AuthProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName={isSignedIn ? "Home" : "Sign in"}>
         <Stack.Screen name="Sign up" component={SignupForm} />
@@ -49,6 +51,7 @@ export default function App() {
       </Stack.Navigator>
       {/* <Toast ref={toastRef} /> */}
     </NavigationContainer>
+    </AuthProvider>
   );
 }
 

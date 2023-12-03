@@ -1,12 +1,24 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Logout from '../logout';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../supabase/supabase';
+import { AuthContext } from '../../Authcontext/authcontext';
 
 const Homestaff = ({ navigation }) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
+  const { userEmail,setUserEmail } = React.useContext(AuthContext);
+
+   const handle_signout = async () => {
+    await supabase.auth.signOut();
+    AsyncStorage.removeItem('sb-jwbgvkgvkjspfnyurjfd-auth-token');
+    AsyncStorage.removeItem('email');
+    setName('');
+    setRole('');
+    navigation.navigate('Sign in');
+  };
+
 
   useEffect(() => {
     const checkToken = async () => {
@@ -32,15 +44,17 @@ const Homestaff = ({ navigation }) => {
   }, []);
   return (
     <View style={styles.container}>
-      <Logout navigation={navigation} />
-      <View style={styles.content}>
+    <Pressable onPress={handle_signout}>
+        <Text>Sign out</Text>
+    </Pressable>
+    <View style={styles.content}>
         <Text style={styles.title}>Welcome to the Home Page For Staffs!</Text>
         <Text style={styles.subtitle}>This is a simple home page in React Native.</Text>
         <Text style={styles.subtitle}>Hello, {name}!</Text>
         <Text style={styles.subtitle}>Your role is {role}!</Text>
-      </View>
     </View>
-  );
+    </View>
+    );
 };
 
 const styles = StyleSheet.create({
