@@ -1,19 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import SignIn from './components/signin';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SignupForm from './components/signup';
 import Home from './components/home';
 import Toast from 'react-native-toast-message';
+import Homeuser from './components/userstack/homeuser';
+import Homestaff from './components/staffstack/homestaff';
+
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add a loading state
+  const toastRef = useRef(null);
 
   useEffect(() => {
     const checkToken = async () => {
@@ -40,8 +44,10 @@ export default function App() {
         <Stack.Screen name="Sign up" component={SignupForm} />
         <Stack.Screen name="Sign in" component={SignIn} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="User" component={Homeuser} />
+        <Stack.Screen name="Staff" component={Homestaff} />
       </Stack.Navigator>
-      <Toast ref={(ref) => Toast.setRef(ref)} />
+      {/* <Toast ref={toastRef} /> */}
     </NavigationContainer>
   );
 }
