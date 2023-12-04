@@ -32,7 +32,7 @@ const SignupForm = ({ navigation }) => {
 };
 
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
     if (password !== confirmPassword) {
         Toast.show({
@@ -66,38 +66,41 @@ const SignupForm = ({ navigation }) => {
     //     });
     //     return;
     // }
-        supabase.auth.signUp({
-            email: email,
-            password: password,
-        }).then((res) => {
-            if (res.error) {
-                Toast.show({
-                    type: 'error',
-                    position: 'top',
-                    text1: 'Error',
-                    text2: res.error.message,
-                    visibilityTime: 4000,
-                    autoHide: true,
-                    topOffset: 30,
-                    bottomOffset: 40,
-                    onShow: () => {},
-                    onHide: () => {},
-                    onPress: () => {}
-                });
-                return;
-            }
-            alert('Check your email for confirmation!');
-            navigation.navigate('Sign in');
+      const res = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+
+    if (res.error) {
+        // Show error message and return early if sign-up failed
+        Toast.show({
+            type: 'error',
+            position: 'top',
+            text1: 'Error',
+            text2: res.error.message,
+            visibilityTime: 4000,
+            autoHide: true,
+            topOffset: 30,
+            bottomOffset: 40,
         });
-        supabase.from('student').insert([
-            { username: username, email: email },
-        ]).then((res) => {
-            if (res.error) {
-                alert(res.error.message);
-                return;
-            }
-        });
-    };
+        return;
+    }
+
+    // If sign-up was successful, add user to 'student' table
+    const { data, error } = await supabase.from('student').insert([
+        { username: username, email: email },
+    ]);
+
+    if (error) {
+        // Handle error in inserting to 'student' table
+        alert(error.message);
+        return;
+    }
+
+    // If everything was successful, navigate to 'Sign in' and show a confirmation
+    alert('Check your email for confirmation!');
+    navigation.navigate('Sign in');
+};
 
     const handleLoginPress = () => {
         navigation.navigate('Sign in'); 

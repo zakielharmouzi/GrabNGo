@@ -11,6 +11,12 @@ import Toast from 'react-native-toast-message';
 import Homeuser from './components/userstack/homeuser';
 import Homestaff from './components/staffstack/homestaff';
 import { AuthProvider } from './Authcontext/authcontext';
+import Proxy from './components/staffstack/proxy';
+import Cossa from './components/staffstack/cossa';
+import Cafeteria from './components/staffstack/cafeteria';
+import Cafeteria_user from './components/userstack/cafeteria_user';
+import Cossa_user from './components/userstack/cossa_user';
+import Proxy_user from './components/userstack/proxy_user';
 
 
 const Stack = createStackNavigator();
@@ -48,6 +54,12 @@ export default function App() {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="User" component={Homeuser} />
         <Stack.Screen name="Staff" component={Homestaff} />
+        <Stack.Screen name="Proxy" component={Proxy} />
+        <Stack.Screen name="Cossa" component={Cossa} />
+        <Stack.Screen name="Cafeteria" component={Cafeteria} />
+        <Stack.Screen name="Cafeteria_user" component={Cafeteria_user} />
+        <Stack.Screen name="Cossa_user" component={Cossa_user} />
+        <Stack.Screen name="Proxy_user" component={Proxy_user} />
       </Stack.Navigator>
       {/* <Toast ref={toastRef} /> */}
     </NavigationContainer>

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, ActivityIndicator, StyleSheet,Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../supabase/supabase';
@@ -9,10 +9,11 @@ const Home = ({ navigation }) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const { userEmail } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handle_signout = async () => {
     await supabase.auth.signOut();
-    AsyncStorage.removeItem('sb-jwbgvkgvkjspfnyurjfd-auth-token');
+    AsyncStorage.removeItem('sb-jwbgvkgvkjspfnyurjfd-auth-torken');
     AsyncStorage.removeItem('email');
     setName('');
     setRole('');
@@ -51,28 +52,30 @@ const Home = ({ navigation }) => {
         } else {
           navigation.navigate('Sign in');
         }
+        setIsLoading(false);
       };
 
       fetchUserData();
     }, [userEmail, navigation])
   );
 
-  return (
-    <View style={styles.container}>
-      <Pressable onPress={handle_signout}>
-        <Text>Sign out</Text>
-      </Pressable>
-
-      <View style={styles.content}>
-        <Text style={styles.title}>Welcome to the Home Page!</Text>
-        <Text style={styles.subtitle}>This is a simple home page in React Native.</Text>
-        <Text style={styles.subtitle}>Hello, {name}!</Text>
-        <Text style={styles.subtitle}>Your role is {role}!</Text>
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" />
       </View>
-    </View>
-  );
+    );
+  }
+  else{
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome to the Home Page!</Text>
+      </View>
+    );
+  }
 };
-const styles = StyleSheet.create({
+
+  const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -91,5 +94,8 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
 });
+
+
+
 
 export default Home;

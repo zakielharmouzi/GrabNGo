@@ -1,14 +1,17 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable,TouchableOpacity,Image } from 'react-native';
 import Logout from '../logout';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../supabase/supabase';
 import { AuthContext } from '../../Authcontext/authcontext';
 
+
 const Homestaff = ({ navigation }) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const { userEmail,setUserEmail } = React.useContext(AuthContext);
+  const logo = require('../../assets/logo.png');
+  
 
    const handle_signout = async () => {
     await supabase.auth.signOut();
@@ -42,6 +45,19 @@ const Homestaff = ({ navigation }) => {
     getusername();
     checkToken();
   }, []);
+
+
+    const handleRestaurantClick = (restaurantId) => {
+        console.log(`Restaurant clicked: ${restaurantId}`);
+        if (restaurantId === 1) {
+            navigation.navigate('Proxy');
+        } else if (restaurantId === 2) {
+            navigation.navigate('Cossa');
+        } else if (restaurantId === 3) {
+            navigation.navigate('Cafeteria');
+        }
+    };
+
   return (
     <View style={styles.container}>
     <Pressable onPress={handle_signout}>
@@ -52,6 +68,13 @@ const Homestaff = ({ navigation }) => {
         <Text style={styles.subtitle}>This is a simple home page in React Native.</Text>
         <Text style={styles.subtitle}>Hello, {name}!</Text>
         <Text style={styles.subtitle}>Your role is {role}!</Text>
+        <View style={styles.restaurantsContainer}>
+        {[1, 2, 3].map((id) => (
+        <TouchableOpacity key={id} onPress={() => handleRestaurantClick(id)}>
+            <Image source={logo} style={styles.restaurantImage} />
+        </TouchableOpacity>
+        ))}
+    </View>
     </View>
     </View>
     );
@@ -74,6 +97,17 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     color: 'gray',
+  },
+  restaurantsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  restaurantImage: {
+    width: 100,
+    height: 100,
+    margin: 10,
   },
 });
 

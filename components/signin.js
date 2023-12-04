@@ -41,6 +41,7 @@ const SignIn = ({ navigation }) => {
             email: username,
             password: password,
         }).then((res) => {
+            console.log(res);
             if (res.error) {
             Toast.show({
                 type: 'error',
