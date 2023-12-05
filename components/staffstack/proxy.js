@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../supabase/supabase';
 import { useFocusEffect } from '@react-navigation/native';
-import { Resend } from 'resend'
+
 
 
 const Proxy = ({ navigation }) => {
     const [orders, setOrders] = useState([]);
-    const resend = new Resend('re_KpiEc97x_N6mZTWdd7tkuUym5CMT2iRep');
+   
     useFocusEffect(
         React.useCallback(() => {
             const fetchOrders = async () => {
@@ -59,14 +59,6 @@ const Proxy = ({ navigation }) => {
             getOrders(); // Refresh the orders list
         }
     };
-    const send_email= () => {
-        resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: 's.mahidat@aui.ma',
-        subject: 'Hello World',
-        html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
-        });
-    }
 
     const renderOrder = ({ item }) => (
         <View style={styles.orderContainer}>
