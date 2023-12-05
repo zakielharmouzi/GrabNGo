@@ -1,35 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../supabase/supabase';
 import { useFocusEffect } from '@react-navigation/native';
-import { Resend } from 'resend'
 
-
-const Proxy = ({ navigation }) => {
+const Cart_user = ({ navigation }) => {
     const [orders, setOrders] = useState([]);
-    const resend = new Resend('re_KpiEc97x_N6mZTWdd7tkuUym5CMT2iRep');
+
     useFocusEffect(
         React.useCallback(() => {
             const fetchOrders = async () => {
                 const username = await AsyncStorage.getItem('email');
-                getOrders();
+                console.log(username);
+                getOrders(username);
             };
+
             fetchOrders();
         }, [])
     );
 
-    const getOrders = async () => {
+    const getOrders = async (username) => {
         const { data, error } = await supabase
             .from('order')
             .select('*')
-            .eq('restaurant_id', 'proxy')
-            .filter('status', 'eq', 'pending');
+            .eq('user_id', username);
+
         if (error) {
             alert(error.message);
             return;
         }
 
+        // Fetch order items for each order
         const ordersWithItems = await Promise.all(data.map(async (order) => {
             const { data: orderItems, error: orderItemsError } = await supabase
                 .from('order_item')
@@ -38,7 +39,7 @@ const Proxy = ({ navigation }) => {
 
             if (orderItemsError) {
                 console.error(orderItemsError.message);
-                return order;
+                return order; // Return the order without items if there's an error
             }
             return { ...order, items: orderItems };
         }));
@@ -46,52 +47,33 @@ const Proxy = ({ navigation }) => {
         setOrders(ordersWithItems);
     };
 
-    const updateOrderStatus = async (orderId) => {
-        const { error } = await supabase
-            .from('order')
-            .update({ status: 'ready' })
-            .eq('order_id', orderId);
-
-        if (error) {
-            alert(error.message);
-        } else {
-            alert(`Order ${orderId} is now ready!`);
-            getOrders(); // Refresh the orders list
-        }
-    };
-    const send_email= () => {
-        resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: 's.mahidat@aui.ma',
-        subject: 'Hello World',
-        html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
-        });
-    }
-
-    const renderOrder = ({ item }) => (
+    const renderOrder = ({ item }) => {
+    // Check if the order_id exists
+    const orderId = item.order_id?.toString() ?? 'unknown-order-id';
+    const orderStatus = item.status?.toString() ?? 'unknown-order-status'
+    return (
         <View style={styles.orderContainer}>
-            <Text style={styles.orderTitle}>Order ID: {item.order_id}</Text>
-            <Text style={styles.orderTitle}>Order Status: {item.user_id}</Text>
+            <Text style={styles.orderTitle}>Order ID: {orderId}</Text>
+            <Text style={styles.orderTitle}>Order Status: {orderStatus}</Text>
             <FlatList
                 data={item.items}
                 renderItem={renderOrderItem}
-                keyExtractor={(orderItem) => `item-${item.order_id}-${orderItem.id}`}
+                keyExtractor={(orderItem) => orderItem.id?.toString() ?? 'unknown-item-id'}
             />
-            <TouchableOpacity 
-                style={styles.button} 
-                onPress={() => updateOrderStatus(item.order_id)}
-            >
-                <Text style={styles.buttonText}>Mark as Ready</Text>
-            </TouchableOpacity>
         </View>
     );
+};
 
-    const renderOrderItem = ({ item }) => (
-        <View style={styles.orderItemContainer}>
+   const renderOrderItem = ({ item }) => {
+    // Check if the item has an id
+    const itemId = item.id?.toString() ?? 'unknown-item-id';
+    return (
+        <View style={styles.orderItemContainer} key={itemId}>
             <Text>{item.item_description}</Text>
             <Text>Quantity: {item.quantity}</Text>
         </View>
     );
+};
 
     return (
         <View style={styles.container}>
@@ -99,7 +81,7 @@ const Proxy = ({ navigation }) => {
             <FlatList
                 data={orders}
                 renderItem={renderOrder}
-                keyExtractor={(item) => `order-${item.order_id}`}
+                keyExtractor={(item) => item.order_id.toString()}
             />
         </View>
     );
@@ -133,18 +115,7 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderBottomWidth: 1,
     },
-    button: {
-        backgroundColor: '#28a745',
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#ffffff',
-        textAlign: 'center',
-        fontWeight: 'bold',
-    },
     // Add any additional styles you need here
 });
 
-export default Proxy;
+export default Cart_user;

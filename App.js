@@ -17,6 +17,7 @@ import Cafeteria from './components/staffstack/cafeteria';
 import Cafeteria_user from './components/userstack/cafeteria_user';
 import Cossa_user from './components/userstack/cossa_user';
 import Proxy_user from './components/userstack/proxy_user';
+import Cart_user from './components/userstack/cart_user';
 
 
 const Stack = createStackNavigator();
@@ -60,6 +61,7 @@ export default function App() {
         <Stack.Screen name="Cafeteria_user" component={Cafeteria_user} />
         <Stack.Screen name="Cossa_user" component={Cossa_user} />
         <Stack.Screen name="Proxy_user" component={Proxy_user} />
+        <Stack.Screen name="Cart" component={Cart_user} />
       </Stack.Navigator>
       {/* <Toast ref={toastRef} /> */}
     </NavigationContainer>

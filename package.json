@@ -24,7 +24,8 @@
     "react-native-elements": "^3.4.3",
     "react-native-toast-message": "^2.1.7",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "resend": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, ActivityIndicator, StyleSheet,Text } from 'react-native';
+import { View, ActivityIndicator, StyleSheet,Text,Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../supabase/supabase';
@@ -24,36 +24,43 @@ const Home = ({ navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       const fetchUserData = async () => {
-        const username = userEmail || await AsyncStorage.getItem('email');
-        if (username) {
-          try {
-            const { data, error } = await supabase
-              .from('student')
-              .select('*')
-              .eq('email', username)
-              .single();
+  const username = userEmail || await AsyncStorage.getItem('email');
+  setIsLoading(true);
+  if (username) {
+    try {
+      const { data, error } = await supabase
+        .from('student')
+        .select('*')
+        .eq('email', username);
 
-            if (error) throw error;
+      if (error) throw error;
 
-            setName(data.username);
-            setRole(data.role);
-            console.log(data.role);
-            if (data.role === 'Staff') {
-            navigation.navigate('Staff');
-        } else{
-          console.log(role);
-            navigation.navigate('User');
-        }
-      
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-            alert(error.message);
-          }
+      if (data.length === 1) {
+        setName(data[0].username);
+        setRole(data[0].role);
+        console.log(data[0].role);
+        if (data[0].role === 'Staff') {
+          navigation.navigate('Staff');
         } else {
-          navigation.navigate('Sign in');
+          console.log(data[0].role);
+          navigation.navigate('User');
         }
-        setIsLoading(false);
-      };
+      } else if (data.length === 0) {
+        console.error('No user found with the email:', username);
+        // Handle the case where no user is found
+      } else {
+        console.error('Multiple users found with the email:', username);
+        // Handle the case where multiple users are found
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      alert(error.message);
+    }
+  } else {
+    navigation.navigate('Sign in');
+  }
+  setIsLoading(false);
+};
 
       fetchUserData();
     }, [userEmail, navigation])
@@ -70,6 +77,11 @@ const Home = ({ navigation }) => {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Welcome to the Home Page!</Text>
+        <Pressable title="Sign out" onPress={handle_signout} />
+        <Pressable onPress={handle_signout}>
+        <Text>Sign out</Text>
+    </Pressable>
+
       </View>
     );
   }

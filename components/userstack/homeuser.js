@@ -58,6 +58,10 @@ const Homestaff = ({ navigation }) => {
         }
     };
 
+    const handlecart = () => {
+        navigation.navigate('Cart');
+    };
+
   return (
     <View style={styles.container}>
     <Pressable onPress={handle_signout}>
@@ -75,7 +79,9 @@ const Homestaff = ({ navigation }) => {
         </TouchableOpacity>
         ))}
     </View>
-    
+    <Pressable style={styles.cartbutton} onPress={handlecart}>
+        <Text>Cart</Text>
+    </Pressable>
     </View>
     </View>
     );
@@ -109,6 +115,13 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     margin: 10,
+  },
+  cartbutton: {
+    alignItems: 'center',
+    backgroundColor: '#DDDDDD',
+    padding: 10,
+    width: 300,
+    marginTop: 16,
   },
 });
 
