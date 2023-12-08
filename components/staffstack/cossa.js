@@ -1,34 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../supabase/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 
+
+
 const Cossa = ({ navigation }) => {
     const [orders, setOrders] = useState([]);
-
+   
     useFocusEffect(
         React.useCallback(() => {
             const fetchOrders = async () => {
+                const username = await AsyncStorage.getItem('email');
                 getOrders();
             };
-
             fetchOrders();
         }, [])
     );
 
-    const getOrders = async (username) => {
+    const getOrders = async () => {
         const { data, error } = await supabase
             .from('order')
             .select('*')
-            .eq('restaurant_id','cossa')
-
+            .eq('restaurant_id', 'cossa')
+            .filter('status', 'eq', 'pending');
         if (error) {
             alert(error.message);
             return;
         }
 
-        // Fetch order items for each order
         const ordersWithItems = await Promise.all(data.map(async (order) => {
             const { data: orderItems, error: orderItemsError } = await supabase
                 .from('order_item')
@@ -37,42 +38,52 @@ const Cossa = ({ navigation }) => {
 
             if (orderItemsError) {
                 console.error(orderItemsError.message);
-                return order; // Return the order without items if there's an error
+                return order;
             }
-
             return { ...order, items: orderItems };
         }));
 
         setOrders(ordersWithItems);
     };
 
-    const renderOrder = ({ item }) => {
-    // Check if the order_id exists
-    const orderId = item.order_id?.toString() ?? 'unknown-order-id';
-    const orderStatus = item.status?.toString() ?? 'unknown-order-status'
-    return (
+    const updateOrderStatus = async (orderId) => {
+        const { error } = await supabase
+            .from('order')
+            .update({ status: 'ready' })
+            .eq('order_id', orderId);
+
+        if (error) {
+            alert(error.message);
+        } else {
+            alert(`Order ${orderId} is now ready!`);
+            getOrders(); // Refresh the orders list
+        }
+    };
+
+    const renderOrder = ({ item }) => (
         <View style={styles.orderContainer}>
-            <Text style={styles.orderTitle}>Order ID: {orderId}</Text>
-            <Text style={styles.orderTitle}>Order Status: {orderStatus}</Text>
+            <Text style={styles.orderTitle}>Order ID: {item.order_id}</Text>
+            <Text style={styles.orderTitle}>Order Status: {item.user_id}</Text>
             <FlatList
                 data={item.items}
                 renderItem={renderOrderItem}
-                keyExtractor={(orderItem) => orderItem.id?.toString() ?? 'unknown-item-id'}
+                keyExtractor={(orderItem) => `item-${item.order_id}-${orderItem.id}`}
             />
+            <TouchableOpacity 
+                style={styles.button} 
+                onPress={() => updateOrderStatus(item.order_id)}
+            >
+                <Text style={styles.buttonText}>Mark as Ready</Text>
+            </TouchableOpacity>
         </View>
     );
-};
 
-   const renderOrderItem = ({ item }) => {
-    // Check if the item has an id
-    const itemId = item.id?.toString() ?? 'unknown-item-id';
-    return (
-        <View style={styles.orderItemContainer} key={itemId}>
+    const renderOrderItem = ({ item }) => (
+        <View style={styles.orderItemContainer}>
             <Text>{item.item_description}</Text>
             <Text>Quantity: {item.quantity}</Text>
         </View>
     );
-};
 
     return (
         <View style={styles.container}>
@@ -80,7 +91,7 @@ const Cossa = ({ navigation }) => {
             <FlatList
                 data={orders}
                 renderItem={renderOrder}
-                keyExtractor={(item) => item.order_id.toString()}
+                keyExtractor={(item) => `order-${item.order_id}`}
             />
         </View>
     );
@@ -113,6 +124,17 @@ const styles = StyleSheet.create({
         padding: 10,
         borderColor: 'gray',
         borderBottomWidth: 1,
+    },
+    button: {
+        backgroundColor: '#28a745',
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+    },
+    buttonText: {
+        color: '#ffffff',
+        textAlign: 'center',
+        fontWeight: 'bold',
     },
     // Add any additional styles you need here
 });

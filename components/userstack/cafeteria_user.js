@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../../supabase/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Cafeteria from '../staffstack/cafeteria';
 
 const Separator = () => (
   <View style={styles.separator}>

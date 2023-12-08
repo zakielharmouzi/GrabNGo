@@ -42,9 +42,47 @@ const Homestaff = ({ navigation }) => {
         setRole(res.data[0].role);
       });
     }
+    fetch_order_status = async () => {
+    const { data, error } = await supabase
+      .from('order')
+      .select('*')
+      .eq('user_id', userEmail)
+      .eq('status', 'ready')
+      .eq('flaged', 'false')
+      
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    if (data.length > 0) {
+      const { data:order_data,error } = await supabase
+        .from('order_item')
+        .select('*')
+        .eq('order_id', data[0].order_id);
+      if (error) {
+        console.error(error.message);
+        return;
+      }
+      alert('order number ' + data[0].order_id +' that contains the following item:'+ order_data[0].item_category + ' is ready for collection');
+      await supabase
+        .from('order')
+        .update({ flaged: 'true' })
+        .eq('order_id', data[0].order_id);
+    }
+    };
+
     getusername();
     checkToken();
-  }, []);
+
+
+    const interval = setInterval(() => {
+    fetch_order_status();
+  }, 10000);
+
+  // Clear interval on component unmount
+  return () => clearInterval(interval);
+}, []);
+
 
 
     const handleRestaurantClick = (restaurantId) => {
